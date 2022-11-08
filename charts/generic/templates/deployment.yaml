@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        prometheus.io/path: {{ .Values.monitoring.metrics.path }}
+        prometheus.io/port: {{ .Values.monitoring.metrics.port | default .Values.service.containerPort | quote }}
+        prometheus.io/scrape: {{ .Values.monitoring.metrics.enabled | quote }}
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
+          {{- with .Values.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{ end }}
+          {{- with .Values.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{ end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $key, $value := .Values.envValueFrom }}
+            - name: {{ $key }}
+              valueFrom:
+                {{- toYaml $value | nindent 16 }}
+            {{- end }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- with .Values.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            - configMapRef:
+                name: {{ include "app.fullname" . }}
+            - secretRef:
+                name: {{ include "app.fullname" . }}
+          ports:
+            {{- if .Values.service.ports }}
+            {{- range $portName, $portData := .Values.service.ports }}
+            - name: {{ $portName }}
+              containerPort: {{ $portData.containerPort | default "8000" }}
+              protocol: TCP
+            {{- end }}
+            {{- else }}
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+            {{- end }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            {{- with .Values.probes.liveness }}
+            httpGet:
+              path: {{ .path }}
+              port: {{ $.Values.service.containerPort }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            {{- with .Values.probes.readiness }}
+            httpGet:
+              path: {{ .path }}
+              port: {{ $.Values.service.containerPort }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.probes.startup.enabled }}
+          startupProbe:
+            {{- with .Values.probes.startup }}
+            httpGet:
+              path: {{ .path }}
+              port: {{ $.Values.service.containerPort }}
+            initialDelaySeconds: {{ .initialDelaySeconds }}
+            periodSeconds: {{ .periodSeconds }}
+            timeoutSeconds: {{ .timeoutSeconds }}
+            failureThreshold: {{ .failureThreshold }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- if .Values.configVolume.enabled }}
+            - name: config-vol
+              mountPath: {{ .Values.configVolume.mountPath | default "/config" }}
+          {{- end }}
+          {{- if .Values.secretsVolume.enabled }}
+            - name: secrets-vol
+              mountPath: {{ .Values.secretsVolume.mountPath | default "/secrets" }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- range $sidecarKey, $sidecarData := .Values.sidecarContainers }}
+        - name: {{ $sidecarKey }}
+          {{- toYaml $sidecarData | nindent 10 }}
+        {{- end }}
+      volumes:
+      {{- if .Values.configVolume.enabled }}
+        - name: config-vol
+          configMap:
+            name: {{ include "app.fullname" . }}-vol
+      {{- end }}
+      {{- if .Values.secretsVolume.enabled }}
+        - name: secrets-vol
+          secret:
+            secretName: {{ include "app.fullname" . }}-vol
+            defaultMode: 0400
+      {{- end }}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
