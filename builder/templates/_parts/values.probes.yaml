@@ -1,0 +1,13 @@
+[[ _health = globals().get('health', {}) ]]
+
+probes:
+  [[ for _probe in ['liveness', 'readiness', 'startup']: ]]
+
+  [[ =_probe ]]:
+    enabled: false
+    path: [[ =_health.get(f'path_{_probe}', '/_health') ]]
+    initialDelaySeconds: [[ =_health.get("delay_init", 0) ]]
+    periodSeconds: [[ =_health.get("period", 10) ]]
+    timeoutSeconds: [[ =_health.get("timeout", 5) ]]
+    failureThreshold: [[ =_health.get("failures", 3) ]]
+  [[ pass ]]

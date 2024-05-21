@@ -1,0 +1,14 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _vsprefix = globals().get('_vsprefix', '' if _scope == 'local' else _vtarget) ]]
+[[ _indent = globals().get('_indent', 0) ]]
+
+{{- with [[ =_vsprefix ]].command }}
+command:
+  {{- toYaml . | nindent [[ =_indent + 12 ]] }}
+{{- end }}
+{{- with [[ =_vsprefix ]].args }}
+args:
+  {{- toYaml . | nindent [[ =_indent + 12 ]] }}
+{{- end }}

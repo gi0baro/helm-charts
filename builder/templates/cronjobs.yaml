@@ -1,0 +1,4 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ vns = 'cron' ]]
+[[ include './_helpers/range.vars.yaml' ]]
+[[ extend './_layouts/cronjob.yaml' ]]

@@ -1,0 +1,24 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _indent = globals().get('_indent', 0) ]]
+
+[[ if _scope == 'local': ]]
+
+# local pullSecrets
+{{- with $imgdata.pullSecrets | default [[ =_vtarget ]].image.pullSecrets }}
+[[ else: ]]
+
+# global pullSecrets
+{{- with [[ =_vtarget ]].image.pullSecrets }}
+[[ pass ]]
+imagePullSecrets:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}
+{{- with [[ =_vtarget ]].priorityClassName }}
+priorityClassName: {{ . | quote }}
+{{- end }}
+{{- with [[ =_vtarget ]].podSecurityContext }}
+securityContext:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}

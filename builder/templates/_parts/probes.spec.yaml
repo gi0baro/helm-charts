@@ -1,0 +1,38 @@
+[[ _vprefix = globals().get('_vprefix', '.Values') ]]
+
+{{- if [[ =_vprefix ]].probes.liveness.enabled }}
+livenessProbe:
+  {{- with [[ =_vprefix ]].probes.liveness }}
+  httpGet:
+    path: {{ .path }}
+    port: {{ $[[ =_vprefix ]].service.containerPort }}
+  initialDelaySeconds: {{ .initialDelaySeconds }}
+  periodSeconds: {{ .periodSeconds }}
+  timeoutSeconds: {{ .timeoutSeconds }}
+  failureThreshold: {{ .failureThreshold }}
+  {{- end }}
+{{- end }}
+{{- if [[ =_vprefix ]].probes.readiness.enabled }}
+readinessProbe:
+  {{- with [[ =_vprefix ]].probes.readiness }}
+  httpGet:
+    path: {{ .path }}
+    port: {{ $[[ =_vprefix ]].service.containerPort }}
+  initialDelaySeconds: {{ .initialDelaySeconds }}
+  periodSeconds: {{ .periodSeconds }}
+  timeoutSeconds: {{ .timeoutSeconds }}
+  failureThreshold: {{ .failureThreshold }}
+  {{- end }}
+{{- end }}
+{{- if [[ =_vprefix ]].probes.startup.enabled }}
+startupProbe:
+  {{- with [[ =_vprefix ]].probes.startup }}
+  httpGet:
+    path: {{ .path }}
+    port: {{ $[[ =_vprefix ]].service.containerPort }}
+  initialDelaySeconds: {{ .initialDelaySeconds }}
+  periodSeconds: {{ .periodSeconds }}
+  timeoutSeconds: {{ .timeoutSeconds }}
+  failureThreshold: {{ .failureThreshold }}
+  {{- end }}
+{{- end }}

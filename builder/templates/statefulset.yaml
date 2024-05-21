@@ -1,0 +1,6 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ kind = 'StatefulSet' ]]
+[[ _monitoring_annotations = True ]]
+[[ _expose_ports = True ]]
+[[ _use_probes = True ]]
+[[ extend './app.yaml' ]]

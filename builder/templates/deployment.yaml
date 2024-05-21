@@ -1,0 +1,6 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ kind = 'Deployment' ]]
+[[ _monitoring_annotations = True ]]
+[[ _expose_ports = True ]]
+[[ _use_probes = True ]]
+[[ extend './_layouts/app.yaml' ]]

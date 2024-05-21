@@ -1,0 +1,28 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _ctarget = globals().get('_ctarget') ]]
+[[ _indent = globals().get('_indent', 0) ]]
+
+volumeMounts:
+  [[ if _ctarget: ]]
+
+  {{- if and [[ =_vtarget ]].configVolume.enabled and [[ =_vtarget ]].[[ =_ctarget ]]Config }}
+  [[ else: ]]
+
+  {{- if [[ =_vtarget ]].configVolume.enabled }}
+  [[ pass ]]
+  - name: config-vol
+    mountPath: {{ [[ =_vtarget ]].configVolume.mountPath | default "/config" }}
+  {{- end }}
+  [[ if _ctarget: ]]
+  {{- if and [[ =_vtarget ]].secretsVolume.enabled and [[ =_vtarget ]].[[ =_ctarget ]]Secret }}
+  [[ else: ]]
+  {{- if [[ =_vtarget ]].secretsVolume.enabled }}
+  [[ pass ]]
+  - name: secrets-vol
+    mountPath: {{ [[ =_vtarget ]].secretsVolume.mountPath | default "/secrets" }}
+  {{- end }}
+  {{- with [[ =_vtarget ]].volumeMounts }}
+  {{- toYaml . | nindent [[ =_indent + 12 ]] }}
+  {{- end }}

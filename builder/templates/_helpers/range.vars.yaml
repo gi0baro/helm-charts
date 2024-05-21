@@ -1,0 +1,7 @@
+[[ _is_rangemap = True ]]
+[[ _expose_ports = globals().get('_expose_ports', False) ]]
+[[ _scope = 'local' ]]
+[[ name_suffix = vns + '-{{ $key | replace "_" "-" }}' ]]
+[[ label_helper = f'app.{vns}Labels' ]]
+[[ label_sel_helper = f'app.{vns}SelectorLabels' ]]
+[[ label_scope = '$rdata' ]]

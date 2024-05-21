@@ -1,0 +1,143 @@
+[[ kind = globals().get('kind', 'Deployment') ]]
+[[ name_suffix = globals().get('name_suffix', '') ]]
+[[ name_suffix = '-' + name_suffix if name_suffix else name_suffix ]]
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _gctx = _gscope or '.' ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _vsprefix = globals().get('_vsprefix', '' if _scope == 'local' else _vtarget) ]]
+[[ _config_sha = globals().get('_config_sha', True) ]]
+[[ _monitoring_annotations = globals().get('_monitoring_annotations', False) ]]
+[[ label_helper = globals().get('label_helper', 'app.labels') ]]
+[[ label_sel_helper = globals().get('label_sel_helper', 'app.selectorLabels') ]]
+[[ label_scope = globals().get('label_scope', _gctx) ]]
+
+[[ block pre ]]
+[[ include '../_helpers/range.pre.yaml' ]]
+[[ if kind == 'dyn': ]]
+{{ $kind := .kind | default "Deployment" }}
+[[ pass ]]
+[[ end ]]
+
+apiVersion: apps/v1
+[[ if kind == 'dyn': ]]
+kind: {{ $kind }}
+[[ else: ]]
+kind: [[ =kind ]]
+[[ pass ]]
+metadata:
+  name: {{ include "app.fullname" [[ =_gctx ]] }}[[ =name_suffix ]]
+  labels:
+    {{- include "[[ =label_helper ]]" [[ =label_scope ]] | nindent 4 }}
+spec:
+  [[ if kind == 'dyn': ]]
+  {{- if eq $kind "StatefulSet" }}
+  serviceName: {{ include "app.fullname" [[ =_gctx ]] }}[[ =name_suffix ]]
+  {{- end }}
+  [[ elif kind == 'StatefulSet': ]]
+  serviceName: {{ include "app.fullname" [[ =_gctx ]] }}[[ =name_suffix ]]
+  [[ pass ]]
+  [[ block scaling ]]
+  {{- with [[ =_vsprefix ]].autoscaling }}
+  {{- if not .enabled }}
+  replicas: {{ [[ =_vsprefix ]].replicas | default "1" }}
+  {{- end }}
+  {{- end }}
+  [[ end ]]
+  selector:
+    matchLabels:
+      {{- include "[[ =label_sel_helper ]]" [[ =label_scope ]] | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        [[ block annotations ]]
+        {{- with [[ =_vtarget ]].podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        [[ if _config_sha: ]]
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") [[ =_gctx ]] | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") [[ =_gctx ]] | sha256sum }}
+        [[ pass ]]
+        [[ if _monitoring_annotations: ]]
+        prometheus.io/path: {{ [[ =_vtarget ]].monitoring.metrics.path }}
+        prometheus.io/port: {{ [[ =_vtarget ]].monitoring.metrics.port | default [[ =_vtarget ]].service.containerPort | quote }}
+        prometheus.io/scrape: {{ [[ =_vtarget ]].monitoring.metrics.enabled | quote }}
+        [[ pass ]]
+        [[ end ]]
+      labels:
+        {{- include "[[ =label_helper ]]" [[ =label_scope ]] | nindent 8 }}
+    spec:
+      [[ block runtime ]]
+      [[ include '../_parts/runtime.spec.yaml' ]]
+      [[ end ]]
+      containers:
+        - name: {{ [[ =_gscope ]].Chart.Name }}
+          {{- with [[ =_vtarget ]].securityContext }}
+          securityContext:
+            {{- toYaml [[ =_vtarget ]].securityContext | nindent 12 }}
+          {{- end }}
+          [[ block image ]]
+          [[ include '../_helpers/range.img.yaml' ]]
+          [[ end ]]
+          [[ block cmd ]]
+          [[ include '../_parts/cmd.spec.yaml' ]]
+          [[ end ]]
+          [[ block env ]]
+          [[ include '../_parts/env.spec.yaml' ]]
+          [[ end ]]
+          [[ block ports ]]
+          [[ if globals().get("_expose_ports", False): ]]
+          ports:
+            [[ if _scope == 'global': ]]
+            {{- if [[ =_vtarget ]].service.ports }}
+            {{- range $portName, $portData := [[ =_vtarget ]].service.ports }}
+            - name: {{ $portName }}
+              containerPort: {{ $portData.containerPort | default "8000" }}
+              protocol: TCP
+            {{- end }}
+            {{- else }}
+            - name: http
+              containerPort: {{ [[ =_vtarget ]].service.containerPort }}
+              protocol: TCP
+            {{- end }}
+            [[ else: ]]
+            {{- with [[ =_vsprefix ]].ports }}
+            {{- range $portName, $portValue := . }}
+            - name: {{ $portName }}
+              containerPort: {{ $portValue }}
+              protocol: TCP
+            {{- end }}
+            {{- end }}
+            [[ pass ]]
+          [[ pass ]]
+          [[ end ]]
+          [[ block probes ]]
+          [[ if globals().get("_use_probes", False): ]]
+          [[ include '../_parts/probes.spec.yaml' ]]
+          [[ pass ]]
+          [[ end ]]
+          [[ block resources ]]
+          [[ include '../_parts/res.spec.yaml' ]]
+          [[ end ]]
+          [[ block volume_mounts ]]
+          [[ include '../_parts/volumemounts.spec.yaml' ]]
+          [[ end ]]
+        [[ block sidecars ]]
+        [[ if _scope == 'global': ]]
+        {{- with [[ =_vsprefix ]].sidecarContainers }}
+        {{- range $sidecarKey, $sidecarData := . }}
+        - name: {{ $sidecarKey }}
+          {{- toYaml $sidecarData | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        [[ pass ]]
+        [[ end ]]
+      [[ block volumes ]]
+      [[ include '../_parts/volumes.spec.yaml' ]]
+      [[ end ]]
+      [[ block affinity ]]
+      [[ include '../_parts/affinity.spec.yaml' ]]
+      [[ end ]]
+[[ block post ]]
+[[ include '../_helpers/range.post.yaml' ]]
+[[ end ]]

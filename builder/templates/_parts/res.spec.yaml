@@ -1,0 +1,19 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _gctx = _gscope or '.' ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _vsprefix = globals().get('_vsprefix', '' if _scope == 'local' else _vtarget) ]]
+[[ _indent = globals().get('_indent', 0) ]]
+
+[[ if _scope == 'local': ]]
+
+# local resources
+{{- with [[ =_vsprefix ]].resources | default [[ =_vtarget ]].resources }}
+[[ else: ]]
+
+# global resources
+{{- with [[ =_vsprefix ]].resources }}
+[[ pass ]]
+resources:
+  {{- toYaml . | nindent [[ =_indent + 12]] }}
+{{- end }}

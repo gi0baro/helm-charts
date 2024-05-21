@@ -1,0 +1,24 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _gctx = _gscope or '.' ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _vsprefix = globals().get('_vsprefix', '' if _scope == 'local' else _vtarget) ]]
+[[ _indent = globals().get('_indent', 0) ]]
+[[ _own_tolerations = globals().get('_own_tolerations', False) ]]
+
+{{- with [[ =_vsprefix ]].nodeSelector }}
+nodeSelector:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}
+{{- with [[ =_vsprefix ]].affinity }}
+affinity:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}
+[[ if _own_tolerations: ]]
+{{- with [[ =_vsprefix ]].tolerations }}
+[[ else: ]]
+{{- with [[ =_vtarget ]].tolerations }}
+[[ pass ]]
+tolerations:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}

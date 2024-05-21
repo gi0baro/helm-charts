@@ -1,0 +1,8 @@
+# image
+[[ if globals().get('_is_rangemap'): ]]
+image: "{{ $imgdata.repository | default $.Values.image.repository }}:{{ $imgdata.tag | default $.Values.image.tag }}"
+imagePullPolicy: {{ $imgdata.pullPolicy | default $.Values.image.pullPolicy }}
+[[ else: ]]
+image: "{{ [[ =_vtarget ]].image.repository }}:{{ [[ =_vtarget ]].image.tag | default "latest" }}"
+imagePullPolicy: {{ [[ =_vtarget ]].image.pullPolicy }}
+[[ pass ]]

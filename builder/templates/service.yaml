@@ -1,0 +1,45 @@
+[[ include './_helpers/_genid.yaml' ]]
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  {{- with .Values.service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  ports:
+    {{- if .Values.service.ports }}
+    {{- range $portName, $portData := .Values.service.ports }}
+    - name: {{ $portName }}
+      port: {{ $portData.port | default "8000" }}
+      {{- if and (or (eq $.Values.service.type "NodePort") (eq $.Values.service.type "LoadBalancer")) $.Values.service.nodePort }}
+      nodePort: {{ $.Values.service.nodePort }}
+      {{- end }}
+      targetPort: {{ $portData.containerPort | default "8000" }}
+      protocol: TCP
+      {{- if semverCompare ">=1.20-0" $.Capabilities.KubeVersion.GitVersion }}
+      appProtocol: http
+      {{- end }}
+    {{- end }}
+    {{- else }}
+    - name: http
+      port: {{ .Values.service.port }}
+      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+      targetPort: {{ .Values.service.containerPort }}
+      protocol: TCP
+      {{- if semverCompare ">=1.20-0" .Capabilities.KubeVersion.GitVersion }}
+      appProtocol: http
+      {{- end }}
+    {{- end }}
+  selector:
+    {{- include "app.selectorLabels" . | nindent 4 }}
