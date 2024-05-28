@@ -33,4 +33,21 @@ entries:
     urls:
     - https://github.com/gi0baro/helm-charts/releases/download/generic-0.1.0/generic-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-28T22:10:51.985799192Z"
+  raw:
+  - apiVersion: v2
+    created: "2024-05-28T22:15:42.609037992Z"
+    description: Raw resources chart
+    digest: fb049db5839bc3edce922395355ac363cbca21c3a3187d5dbd8d282cc02ba7d7
+    home: https://github.com/gi0baro/helm-charts
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: g@baro.dev
+      name: Giovanni Barillari
+    name: raw
+    sources:
+    - https://github.com/gi0baro/helm-charts
+    type: application
+    urls:
+    - https://github.com/gi0baro/helm-charts/releases/download/raw-0.1.0/raw-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-05-28T22:15:42.60905293Z"
