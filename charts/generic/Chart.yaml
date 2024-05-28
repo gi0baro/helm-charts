@@ -1,10 +1,10 @@
-# Generated from builder - e94124ea6218
+# Generated from builder - b189508ad397
 
 apiVersion: v2
 type: application
 name: generic
 description: Generic web application
-version: 0.2.0
+version: 0.2.1
 kubeVersion: ">=1.23.0-0"
 home: https://github.com/gi0baro/helm-charts
 sources:
