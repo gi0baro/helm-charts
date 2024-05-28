@@ -1,4 +1,4 @@
-# Generated from builder - e94124ea6218
+[[ include './_helpers/_genid.yaml' ]]
 
 apiVersion: v1
 kind: Service

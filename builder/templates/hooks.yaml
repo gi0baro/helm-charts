@@ -1,0 +1,11 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ vns = 'hook' ]]
+[[ _ctarget = 'hooks' ]]
+[[ include './_helpers/range.vars.yaml' ]]
+[[ extend './_layouts/job.yaml' ]]
+
+[[ block annotations ]]
+helm.sh/hook: {{ .on | default "pre-install,pre-upgrade" }}
+helm.sh/hook-weight: {{ .weight | default "0" | quote }}
+helm.sh/hook-delete-policy: before-hook-creation
+[[ end ]]

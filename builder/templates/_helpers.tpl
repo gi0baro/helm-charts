@@ -1,5 +1,5 @@
 {{/*
-Generated from builder - e94124ea6218
+Generated from builder - [[ =_genid ]]
 */}}
 
 {{/*
@@ -42,27 +42,15 @@ app.kubernetes.io/name: {{ include "app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+[[ for _selector_prefix in ['hook', 'cron', 'worker']: ]]
 {{/*
-Hook selector labels
+[[ =_selector_prefix.title() ]] selector labels
 */}}
-{{- define "app.hookSelectorLabels" -}}
+{{- define "app.[[ =_selector_prefix ]]SelectorLabels" -}}
 app.kubernetes.io/name: {{ include "app.name" .globals }}
-app.kubernetes.io/instance: hook-{{ .name | replace "_" "-" }}
+app.kubernetes.io/instance: [[ =_selector_prefix ]]-{{ .name | replace "_" "-" }}
 {{- end }}
-{{/*
-Cron selector labels
-*/}}
-{{- define "app.cronSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "app.name" .globals }}
-app.kubernetes.io/instance: cron-{{ .name | replace "_" "-" }}
-{{- end }}
-{{/*
-Worker selector labels
-*/}}
-{{- define "app.workerSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "app.name" .globals }}
-app.kubernetes.io/instance: worker-{{ .name | replace "_" "-" }}
-{{- end }}
+[[ pass ]]
 
 {{/*
 Common labels
@@ -87,48 +75,20 @@ Base labels
 app: {{ include "app.name" . }}
 {{- end }}
 
+[[ for _label_prefix in ['hook', 'cron', 'worker']: ]]
 {{/*
-Hook labels
+[[ =_label_prefix.title() ]] labels
 */}}
-{{- define "app.hookLabels" -}}
+{{- define "app.[[ =_label_prefix ]]Labels" -}}
 helm.sh/chart: {{ include "app.chart" .globals }}
-{{ include "app.hookSelectorLabels" . }}
+{{ include "app.[[ =_label_prefix ]]SelectorLabels" . }}
 {{- if .globals.Values.image.tag }}
 app.kubernetes.io/version: {{ .globals.Values.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .globals.Release.Service }}
-app: {{ include "app.name" .globals }}-hook-{{ .name | replace "_" "-" }}
+app: {{ include "app.name" .globals }}-[[ =_label_prefix ]]-{{ .name | replace "_" "-" }}
 {{- with .globals.Values.labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
-{{/*
-Cron labels
-*/}}
-{{- define "app.cronLabels" -}}
-helm.sh/chart: {{ include "app.chart" .globals }}
-{{ include "app.cronSelectorLabels" . }}
-{{- if .globals.Values.image.tag }}
-app.kubernetes.io/version: {{ .globals.Values.image.tag | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .globals.Release.Service }}
-app: {{ include "app.name" .globals }}-cron-{{ .name | replace "_" "-" }}
-{{- with .globals.Values.labels }}
-{{ toYaml . }}
-{{- end }}
-{{- end }}
-{{/*
-Worker labels
-*/}}
-{{- define "app.workerLabels" -}}
-helm.sh/chart: {{ include "app.chart" .globals }}
-{{ include "app.workerSelectorLabels" . }}
-{{- if .globals.Values.image.tag }}
-app.kubernetes.io/version: {{ .globals.Values.image.tag | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .globals.Release.Service }}
-app: {{ include "app.name" .globals }}-worker-{{ .name | replace "_" "-" }}
-{{- with .globals.Values.labels }}
-{{ toYaml . }}
-{{- end }}
-{{- end }}
+[[ pass ]]

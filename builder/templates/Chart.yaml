@@ -1,0 +1,20 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ _name = globals().get("name", "chart") ]]
+[[ _version = globals().get("version", "0.1.0") ]]
+[[ _description = globals().get("description") ]]
+[[ _kube_version = globals().get("_kube_version", ">=1.23.0-0") ]]
+
+apiVersion: v2
+type: application
+name: [[ =_name ]]
+[[ if _description: ]]
+description: [[ =_description ]]
+[[ pass ]]
+version: [[ =_version ]]
+kubeVersion: "[[ =_kube_version ]]"
+home: https://github.com/gi0baro/helm-charts
+sources:
+  - https://github.com/gi0baro/helm-charts
+maintainers:
+  - name: Giovanni Barillari
+    email: g@baro.dev

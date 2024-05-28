@@ -1,0 +1,7 @@
+[[ if globals().get('_is_rangemap'): ]]
+{{- range $key, $val := .Values.[[ =vns ]]s }}
+{{ $rdata := dict "name" $key "[[ =vns ]]" $val "globals" $ }}
+---
+{{- with $val }}
+{{ $imgdata := .image | default $.Values.image }}
+[[ pass ]]

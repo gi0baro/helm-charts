@@ -1,0 +1,67 @@
+[[ name_suffix = globals().get('name_suffix', '') ]]
+[[ name_suffix = '-' + name_suffix if name_suffix else name_suffix ]]
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _gctx = _gscope or '.' ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _vsprefix = globals().get('_vsprefix', '' if _scope == 'local' else _vtarget) ]]
+[[ label_helper = globals().get('label_helper', 'app.labels') ]]
+[[ label_scope = globals().get('label_scope', _gctx) ]]
+
+[[ block pre ]]
+[[ include '../_helpers/range.pre.yaml' ]]
+[[ end ]]
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "app.fullname" [[ =_gctx ]] }}[[ =name_suffix ]]
+  labels:
+    app.kubernetes.io/component: batch-process
+    {{- include "[[ =label_helper ]]" [[ =label_scope ]] | nindent 4 }}
+spec:
+  schedule: {{ [[ =_vsprefix ]].schedule | quote }}
+  startingDeadlineSeconds: 1000
+  suspend: {{ [[ =_vsprefix ]].suspend }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "[[ =label_helper ]]" [[ =label_scope ]] | nindent 8 }}
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "[[ =label_helper ]]" [[ =label_scope ]] | nindent 12 }}
+        spec:
+          [[ _indent = 4 ]]
+          restartPolicy: Never
+          [[ block runtime ]]
+          [[ include '../_parts/runtime.spec.yaml' ]]
+          [[ end ]]
+          containers:
+            - name: {{ [[ =_gscope ]].Chart.Name }}
+              {{- with [[ =_vtarget ]].securityContext }}
+              securityContext:
+                {{- toYaml [[ =_vtarget ]].securityContext | nindent 16 }}
+              {{- end }}
+              [[ block image ]]
+              [[ include '../_helpers/range.img.yaml' ]]
+              [[ end ]]
+              [[ block cmd ]]
+              [[ include '../_parts/cmd.spec.yaml' ]]
+              [[ end ]]
+              [[ block env ]]
+              [[ include '../_parts/env.spec.yaml' ]]
+              [[ end ]]
+              [[ block resources ]]
+              [[ include '../_parts/res.spec.yaml' ]]
+              [[ end ]]
+          [[ block affinity ]]
+          [[ include '../_parts/affinity.spec.yaml' ]]
+          [[ end ]]
+[[ block post ]]
+[[ include '../_helpers/range.post.yaml' ]]
+[[ end ]]

@@ -1,0 +1,34 @@
+[[ _scope = globals().get('_scope', 'global') ]]
+[[ _gscope = globals().get('_gscope', '$' if _scope == 'local' else '') ]]
+[[ _gctx = _gscope or '.' ]]
+[[ _vtarget = globals().get('_vtarget', f'{_gscope}.Values') ]]
+[[ _ctarget = globals().get('_ctarget') ]]
+[[ _name_suffix = globals().get('vns', '') ]]
+[[ _name_suffix = '-' + _name_suffix if _name_suffix else '' ]]
+[[ _indent = globals().get('_indent', 0) ]]
+
+volumes:
+  [[ if _ctarget: ]]
+
+  {{- if and [[ =_vtarget ]].configVolume.enabled and [[ =_vtarget ]].[[ =_ctarget ]]Config }}
+  [[ else: ]]
+
+  {{- if [[ =_vtarget ]].configVolume.enabled }}
+  [[ pass ]]
+  - name: config-vol
+    configMap:
+      name: {{ include "app.fullname" [[ =_gctx ]] }}-vol[[ =_name_suffix ]]
+  {{- end }}
+  [[ if _ctarget: ]]
+  {{- if and [[ =_vtarget ]].secretsVolume.enabled [[ =_vtarget ]].[[ =_ctarget ]]Secret }}
+  [[ else: ]]
+  {{- if [[ =_vtarget ]].secretsVolume.enabled }}
+  [[ pass ]]
+  - name: secrets-vol
+    secret:
+      secretName: {{ include "app.fullname" [[ =_gctx ]] }}-vol[[ =_name_suffix ]]
+      defaultMode: {{ [[ =_vtarget ]].secretsVolume.mode | default "0400" }}
+  {{- end }}
+  {{- with [[ =_vtarget ]].volumes }}
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+  {{- end }}

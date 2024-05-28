@@ -1,0 +1,4 @@
+[[ if globals().get('_is_rangemap'): ]]
+{{- end }}
+{{- end }}
+[[ pass ]]

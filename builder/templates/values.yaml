@@ -1,17 +1,20 @@
-# Generated from builder - e94124ea6218
+[[ include './_helpers/_genid.yaml' ]]
 
-image:
-  repository:
-  tag: latest
-  pullPolicy: IfNotPresent
-  pullSecrets: []
+[[ block image ]]
+[[ include './_parts/values.image.yaml' ]]
+[[ end ]]
 
+[[ block labels ]]
 #: Custom labels to add into metadata
 labels: {}
   # foo: bar
+[[ end ]]
 
+[[ block annotations ]]
 podAnnotations: {}
+[[ end ]]
 
+[[ block scaling ]]
 replicas: 1
 
 #: Create HorizontalPodAutoscaler object for deployment type
@@ -21,7 +24,9 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 200
   targetMemoryUtilizationPercentage: 150
+[[ end ]]
 
+[[ block deploy_strategy ]]
 #: See `kubectl explain poddisruptionbudget.spec` for more
 #  ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 podDisruptionBudget: {}
@@ -32,42 +37,22 @@ podDisruptionBudget: {}
 #  ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 deploymentStrategy:
   type: RollingUpdate
+[[ end ]]
 
+[[ block service ]]
 service:
   annotations: {}
   type: ClusterIP
   port: "8000"
   containerPort: "8000"
   # nodePort:
+[[ end ]]
 
+[[ block probes ]]
+[[ include './_parts/values.probes.yaml' ]]
+[[ end ]]
 
-probes:
-
-  liveness:
-    enabled: false
-    path: /_health
-    initialDelaySeconds: 0
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-  
-  readiness:
-    enabled: false
-    path: /_health
-    initialDelaySeconds: 0
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-  
-  startup:
-    enabled: false
-    path: /_health
-    initialDelaySeconds: 0
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-  
-
+[[ block ingress ]]
 ingress:
   enabled: false
   #: For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
@@ -89,14 +74,18 @@ ingress:
   #  - secretName: app-tls
   #    hosts:
   #      - app.local
+[[ end ]]
 
+[[ block resources ]]
 resources: {}
   # limits:
   #   memory: 200Mi
   # requests:
   #   cpu: 100m
   #   memory: 100Mi
+[[ end ]]
 
+[[ block affinity ]]
 nodeSelector: {}
 
 tolerations: []
@@ -111,7 +100,9 @@ affinity: {}
   #         values:
   #         - example
   #     topologyKey: "kubernetes.io/hostname"
+[[ end ]]
 
+[[ block runtime ]]
 priorityClassName: ""
 
 podSecurityContext: {}
@@ -124,20 +115,28 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
+[[ end ]]
 
+[[ block cmd ]]
 command: []
 args: []
+[[ end ]]
 
+[[ block volumes ]]
 volumes: []
 volumeMounts: []
+[[ end ]]
 
+[[ block env ]]
 env: {}
 envFrom: []
 envValueFrom: {}
   # POD_IP:
   #   fieldRef:
   #     fieldPath: status.podIP
+[[ end ]]
 
+[[ block config ]]
 config: {}
   # environment: debug
 
@@ -160,9 +159,13 @@ secretsVolume:
 
 hooksConfig: true
 hooksSecret: true
+[[ end ]]
 
+[[ block sidecars ]]
 sidecarContainers: {}
+[[ end ]]
 
+[[ block hooks ]]
 hooks: {}
   # example:
   #   on: post-install,pre-upgrade
@@ -181,7 +184,9 @@ hooks: {}
 
   #   affinity: {}
   #   nodeSelector: {}
+[[ end ]]
 
+[[ block workers ]]
 workers: {}
   # example:
   #   image:
@@ -210,7 +215,9 @@ workers: {}
 
   #   ports:
   #     http: 8000
+[[ end ]]
 
+[[ block crons ]]
 crons: {}
   # example:
   #   image:
@@ -228,8 +235,11 @@ crons: {}
 
   #   affinity: {}
   #   nodeSelector: {}
+[[ end ]]
 
+[[ block monitoring ]]
 monitoring:
   metrics:
     enabled: false
     path: /metrics
+[[ end ]]

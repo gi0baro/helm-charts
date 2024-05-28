@@ -1,0 +1,42 @@
+[[ _kind = globals().get('kind', 'ConfigMap') ]]
+[[ _vsource = {'ConfigMap': 'config', 'Secret': 'secrets'}[_kind] ]]
+[[ _data_type = {'ConfigMap': 'data', 'Secret': 'stringData'}[_kind] ]]
+[[ name_suffix = globals().get('name_suffix', '') ]]
+
+[[ block pre ]]
+[[ end ]]
+
+apiVersion: v1
+kind: [[ =_kind ]]
+metadata:
+  name: {{ include "app.fullname" . }}[[ =name_suffix ]]
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    [[ block annotations ]]
+    [[ end ]]
+[[ =_data_type ]]:
+  {{- with .Values.[[ =_vsource ]] }}
+  {{- range $key, $value := . }}
+  {{ $key | upper }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- if .Values.[[ =_vsource ]]Volume.enabled }}
+---
+apiVersion: v1
+kind: [[ =_kind ]]
+metadata:
+  name: {{ include "app.fullname" . }}-vol[[ =name_suffix ]]
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    [[ block annotations_vol ]]
+    [[ end ]]
+[[ =_data_type ]]:
+  {{- with .Values.[[ =_vsource ]]Volume.data }}
+  {{ toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+
+[[ block post ]]
+[[ end ]]

@@ -1,0 +1,6 @@
+[[ include './_helpers/_genid.yaml' ]]
+[[ _expose_ports = True ]]
+[[ kind = 'dyn' ]]
+[[ vns = 'worker' ]]
+[[ include './_helpers/range.vars.yaml' ]]
+[[ extend './_layouts/app.yaml' ]]
