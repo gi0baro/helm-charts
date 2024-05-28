@@ -1,0 +1,12 @@
+apiVersion: v2
+type: application
+name: raw
+description: Raw resources chart
+version: 0.1.0
+kubeVersion: ">=1.16.0-0"
+home: https://github.com/gi0baro/helm-charts
+sources:
+  - https://github.com/gi0baro/helm-charts
+maintainers:
+  - name: Giovanni Barillari
+    email: g@baro.dev
