@@ -38,10 +38,8 @@ spec:
   serviceName: {{ include "app.fullname" [[ =_gctx ]] }}[[ =name_suffix ]]
   [[ pass ]]
   [[ block scaling ]]
-  {{- with [[ =_vsprefix ]].autoscaling }}
-  {{- if not .enabled }}
+  {{- if not [[ =_vsprefix ]].autoscaling.enabled }}
   replicas: {{ [[ =_vsprefix ]].replicas | default "1" }}
-  {{- end }}
   {{- end }}
   [[ end ]]
   selector:

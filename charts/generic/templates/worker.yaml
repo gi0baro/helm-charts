@@ -1,38 +1,44 @@
+# Generated from builder - e94124ea6218
+
+
 {{- range $key, $val := .Values.workers }}
-{{ $wdata := dict "name" $key "worker" $val "globals" $ }}
-{{ $imgdata := $val.image | default $.Values.image }}
-{{ $kind := $val.kind | default "Deployment" }}
+{{ $rdata := dict "name" $key "worker" $val "globals" $ }}
 ---
 {{- with $val }}
+{{ $imgdata := .image | default $.Values.image }}
+
+{{ $kind := .kind | default "Deployment" }}
+
 apiVersion: apps/v1
 kind: {{ $kind }}
 metadata:
-  name: {{ include "app.fullname" $ }}-wrk-{{ $key | replace "_" "-" }}
+  name: {{ include "app.fullname" $ }}-worker-{{ $key | replace "_" "-" }}
   labels:
-    {{- include "app.workerLabels" $wdata | nindent 4 }}
+    {{- include "app.workerLabels" $rdata | nindent 4 }}
 spec:
   {{- if eq $kind "StatefulSet" }}
-  serviceName: {{ include "app.fullname" $ }}-wrk-{{ $key | replace "_" "-" }}
+  serviceName: {{ include "app.fullname" $ }}-worker-{{ $key | replace "_" "-" }}
   {{- end }}
-  {{- with .autoscaling }}
-  {{- if not .enabled }}
-  replicas: {{ $val.replicas | default "1" }}
-  {{- end }}
+  {{- if not .autoscaling.enabled }}
+  replicas: {{ .replicas | default "1" }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "app.workerSelectorLabels" $wdata | nindent 6 }}
+      {{- include "app.workerSelectorLabels" $rdata | nindent 6 }}
   template:
     metadata:
       annotations:
-      {{- with $.Values.podAnnotations }}
+        {{- with $.Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") $ | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
       labels:
-        {{- include "app.workerSelectorLabels" $wdata | nindent 8 }}
+        {{- include "app.workerLabels" $rdata | nindent 8 }}
     spec:
+      
+
+      # local pullSecrets
       {{- with $imgdata.pullSecrets | default $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -50,18 +56,29 @@ spec:
           securityContext:
             {{- toYaml $.Values.securityContext | nindent 12 }}
           {{- end }}
+          # image
           image: "{{ $imgdata.repository | default $.Values.image.repository }}:{{ $imgdata.tag | default $.Values.image.tag }}"
           imagePullPolicy: {{ $imgdata.pullPolicy | default $.Values.image.pullPolicy }}
+
+          
           {{- with .command }}
           command:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
           env:
+
+            # global envValueFrom
             {{- range $key, $value := $.Values.envValueFrom }}
             - name: {{ $key }}
               valueFrom:
                 {{- toYaml $value | nindent 16 }}
             {{- end }}
+            # local envValueFrom
             {{- with .envValueFrom }}
             {{- range $key, $value := . }}
             - name: {{ $key }}
@@ -69,10 +86,12 @@ spec:
                 {{- toYaml $value | nindent 16 }}
             {{- end }}
             {{- end }}
+            # global env
             {{- range $key, $value := $.Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+            # local env
             {{- with .env }}
             {{- range $key, $value := . }}
             - name: {{ $key }}
@@ -80,55 +99,66 @@ spec:
             {{- end }}
             {{- end }}
           envFrom:
+            # global envFrom
             {{- with $.Values.envFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            # local envFrom
             {{- with .envFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
             - configMapRef:
-                name: {{ include "app.fullname" $ }}
+                name: {{ include "app.fullname" $ }}          
             - secretRef:
-                name: {{ include "app.fullname" $ }}
-          {{- with .ports }}
+                name: {{ include "app.fullname" $ }}          
+            
           ports:
+            {{- with .ports }}
             {{- range $portName, $portValue := . }}
             - name: {{ $portName }}
               containerPort: {{ $portValue }}
               protocol: TCP
             {{- end }}
-          {{- end }}
+            {{- end }}
+          
+
+          # local resources
           {{- with .resources | default $.Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          
           volumeMounts:
-          {{- if $.Values.configVolume.enabled }}
+          
+            {{- if $.Values.configVolume.enabled }}
             - name: config-vol
               mountPath: {{ $.Values.configVolume.mountPath | default "/config" }}
-          {{- end }}
-          {{- if $.Values.secretsVolume.enabled }}
+            {{- end }}
+            {{- if $.Values.secretsVolume.enabled }}
             - name: secrets-vol
               mountPath: {{ $.Values.secretsVolume.mountPath | default "/secrets" }}
-          {{- end }}
-          {{- with $.Values.volumeMounts }}
+            {{- end }}
+            {{- with $.Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
+      
       volumes:
-      {{- if $.Values.configVolume.enabled }}
+      
+        {{- if $.Values.configVolume.enabled }}
         - name: config-vol
           configMap:
-            name: {{ include "app.fullname" . }}-vol
-      {{- end }}
-      {{- if $.Values.secretsVolume.enabled }}
+            name: {{ include "app.fullname" $ }}-vol-worker      
+        {{- end }}
+        {{- if $.Values.secretsVolume.enabled }}
         - name: secrets-vol
           secret:
-            secretName: {{ include "app.fullname" . }}-vol
-            defaultMode: 0400
-      {{- end }}
-      {{- with $.Values.volumes }}
+            secretName: {{ include "app.fullname" $ }}-vol-worker      
+            defaultMode: {{ $.Values.secretsVolume.mode | default "0400" }}
+        {{- end }}
+        {{- with $.Values.volumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
+      
       {{- with .nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -143,3 +173,4 @@ spec:
       {{- end }}
 {{- end }}
 {{- end }}
+

@@ -1,14 +1,14 @@
+# Generated from builder - e94124ea6218
+
 apiVersion: v2
 type: application
 name: generic
 description: Generic web application
-
-version: 0.1.0
-kubeVersion: ">=1.14.0-0"
-
+version: 0.2.0
+kubeVersion: ">=1.23.0-0"
 home: https://github.com/gi0baro/helm-charts
 sources:
   - https://github.com/gi0baro/helm-charts
 maintainers:
   - name: Giovanni Barillari
-    email: gi0baro@d4net.org
+    email: g@baro.dev

@@ -1,6 +1,8 @@
+# Generated from builder - e94124ea6218
+
 {{- if .Values.autoscaling.enabled }}
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ template "app.fullname" . }}
@@ -18,13 +20,17 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}
 {{- range $key, $wrk := .Values.workers }}
@@ -32,7 +38,7 @@ spec:
 {{ $scaling := $wrk.autoscaling | default dict }}
 {{- if $scaling.enabled }}
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ template "app.fullname" $ }}-wrk-{{ $key | replace "_" "-" }}
@@ -50,13 +56,17 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ . }}
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
     {{- end }}
     {{- with $scaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ . }}
+        target:
+          type: Utilization
+          averageUtilization: {{ . }}
     {{- end }}
 {{- end }}
 {{- end }}

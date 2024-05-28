@@ -1,3 +1,5 @@
+# Generated from builder - e94124ea6218
+
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "app.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}

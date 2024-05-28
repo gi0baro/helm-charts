@@ -1,10 +1,12 @@
+# Generated from builder - e94124ea6218
+
 image:
   repository:
   tag: latest
   pullPolicy: IfNotPresent
   pullSecrets: []
 
-# -- Custom labels to add into metadata
+#: Custom labels to add into metadata
 labels: {}
   # foo: bar
 
@@ -12,8 +14,7 @@ podAnnotations: {}
 
 replicas: 1
 
-## Create HorizontalPodAutoscaler object for deployment type
-#
+#: Create HorizontalPodAutoscaler object for deployment type
 autoscaling:
   enabled: false
   minReplicas: 3
@@ -21,14 +22,14 @@ autoscaling:
   targetCPUUtilizationPercentage: 200
   targetMemoryUtilizationPercentage: 150
 
-## See `kubectl explain poddisruptionbudget.spec` for more
-## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+#: See `kubectl explain poddisruptionbudget.spec` for more
+#  ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 podDisruptionBudget: {}
 #  minAvailable: 1
 #  maxUnavailable: 1
 
-## See `kubectl explain deployment.spec.strategy` for more
-## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+#: See `kubectl explain deployment.spec.strategy` for more
+#  ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 deploymentStrategy:
   type: RollingUpdate
 
@@ -39,7 +40,9 @@ service:
   containerPort: "8000"
   # nodePort:
 
+
 probes:
+
   liveness:
     enabled: false
     path: /_health
@@ -47,6 +50,7 @@ probes:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3
+  
   readiness:
     enabled: false
     path: /_health
@@ -54,25 +58,27 @@ probes:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3
+  
   startup:
     enabled: false
     path: /_health
     initialDelaySeconds: 0
     periodSeconds: 10
     timeoutSeconds: 5
-    failureThreshold: 6
+    failureThreshold: 3
+  
 
 ingress:
   enabled: false
-  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
-  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  #: For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  #  See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # className: nginx
-  # Values can be templated
+  #: Values can be templated
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
 
-  # pathType is only for k8s >= 1.1=
+  #: pathType is only for k8s >= 1.1=
   pathType: Prefix
 
   hosts:
@@ -106,7 +112,6 @@ affinity: {}
   #         - example
   #     topologyKey: "kubernetes.io/hostname"
 
-## Optional priorityClassName
 priorityClassName: ""
 
 podSecurityContext: {}
@@ -133,11 +138,9 @@ envValueFrom: {}
   #   fieldRef:
   #     fieldPath: status.podIP
 
-## app configuration
 config: {}
   # environment: debug
 
-## app secrets
 secrets: {}
   # password: foobar
 
@@ -155,10 +158,13 @@ secretsVolume:
   #   secrets.yaml: |
   #     password: foovar
 
+hooksConfig: true
+hooksSecret: true
+
 sidecarContainers: {}
 
-hooks: []
-  # - name: example
+hooks: {}
+  # example:
   #   on: post-install,pre-upgrade
   #   weight: -1
 

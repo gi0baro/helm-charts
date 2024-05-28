@@ -1,3 +1,7 @@
+# Generated from builder - e94124ea6218
+
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +10,7 @@ metadata:
     {{- include "app.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicas | default "1" }}
   {{- end }}
   selector:
     matchLabels:
@@ -14,9 +18,9 @@ spec:
   template:
     metadata:
       annotations:
-      {{- with .Values.podAnnotations }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         prometheus.io/path: {{ .Values.monitoring.metrics.path }}
@@ -25,6 +29,9 @@ spec:
       labels:
         {{- include "app.labels" . | nindent 8 }}
     spec:
+      
+      
+      # global pullSecrets
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -42,34 +49,46 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           {{- end }}
+          # image
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          
+          
           {{- with .Values.command }}
           command:
             {{- toYaml . | nindent 12 }}
-          {{ end }}
+          {{- end }}
           {{- with .Values.args }}
           args:
             {{- toYaml . | nindent 12 }}
-          {{ end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          
           env:
-            {{- range $key, $value := .Values.envValueFrom }}
+            # local envValueFrom
+            {{- with .Values.envValueFrom }}
+            {{- range $key, $value := . }}
             - name: {{ $key }}
               valueFrom:
                 {{- toYaml $value | nindent 16 }}
             {{- end }}
-            {{- range $key, $value := .Values.env }}
+            {{- end }}
+            # local env
+            {{- with .Values.env }}
+            {{- range $key, $value := . }}
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
+            {{- end }}
           envFrom:
+            # local envFrom
             {{- with .Values.envFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
             - configMapRef:
-                name: {{ include "app.fullname" . }}
+                name: {{ include "app.fullname" . }}          
             - secretRef:
-                name: {{ include "app.fullname" . }}
+                name: {{ include "app.fullname" . }}          
+            
           ports:
             {{- if .Values.service.ports }}
             {{- range $portName, $portData := .Values.service.ports }}
@@ -82,6 +101,7 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
             {{- end }}
+          
           {{- if .Values.probes.liveness.enabled }}
           livenessProbe:
             {{- with .Values.probes.liveness }}
@@ -118,41 +138,51 @@ spec:
             failureThreshold: {{ .failureThreshold }}
             {{- end }}
           {{- end }}
+          
+          
+          # global resources
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          
           volumeMounts:
-          {{- if .Values.configVolume.enabled }}
+          
+            {{- if .Values.configVolume.enabled }}
             - name: config-vol
               mountPath: {{ .Values.configVolume.mountPath | default "/config" }}
-          {{- end }}
-          {{- if .Values.secretsVolume.enabled }}
+            {{- end }}
+            {{- if .Values.secretsVolume.enabled }}
             - name: secrets-vol
               mountPath: {{ .Values.secretsVolume.mountPath | default "/secrets" }}
-          {{- end }}
-          {{- with .Values.volumeMounts }}
+            {{- end }}
+            {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
-        {{- range $sidecarKey, $sidecarData := .Values.sidecarContainers }}
+            {{- end }}
+        {{- with .Values.sidecarContainers }}
+        {{- range $sidecarKey, $sidecarData := . }}
         - name: {{ $sidecarKey }}
           {{- toYaml $sidecarData | nindent 10 }}
         {{- end }}
+        {{- end }}
+      
       volumes:
-      {{- if .Values.configVolume.enabled }}
+      
+        {{- if .Values.configVolume.enabled }}
         - name: config-vol
           configMap:
-            name: {{ include "app.fullname" . }}-vol
-      {{- end }}
-      {{- if .Values.secretsVolume.enabled }}
+            name: {{ include "app.fullname" . }}-vol      
+        {{- end }}
+        {{- if .Values.secretsVolume.enabled }}
         - name: secrets-vol
           secret:
-            secretName: {{ include "app.fullname" . }}-vol
-            defaultMode: 0400
-      {{- end }}
-      {{- with .Values.volumes }}
+            secretName: {{ include "app.fullname" . }}-vol      
+            defaultMode: {{ .Values.secretsVolume.mode | default "0400" }}
+        {{- end }}
+        {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
+      
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -165,3 +195,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+

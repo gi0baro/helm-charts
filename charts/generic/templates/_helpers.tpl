@@ -1,4 +1,8 @@
 {{/*
+Generated from builder - e94124ea6218
+*/}}
+
+{{/*
 Expand the name of the release.
 */}}
 {{- define "app.name" -}}
@@ -43,9 +47,8 @@ Hook selector labels
 */}}
 {{- define "app.hookSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "app.name" .globals }}
-app.kubernetes.io/instance: hook-{{ .hook.name | replace "_" "-" }}
+app.kubernetes.io/instance: hook-{{ .name | replace "_" "-" }}
 {{- end }}
-
 {{/*
 Cron selector labels
 */}}
@@ -53,7 +56,6 @@ Cron selector labels
 app.kubernetes.io/name: {{ include "app.name" .globals }}
 app.kubernetes.io/instance: cron-{{ .name | replace "_" "-" }}
 {{- end }}
-
 {{/*
 Worker selector labels
 */}}
@@ -95,12 +97,11 @@ helm.sh/chart: {{ include "app.chart" .globals }}
 app.kubernetes.io/version: {{ .globals.Values.image.tag | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .globals.Release.Service }}
-app: {{ include "app.name" .globals }}-hook-{{ .hook.name | replace "_" "-" }}
+app: {{ include "app.name" .globals }}-hook-{{ .name | replace "_" "-" }}
 {{- with .globals.Values.labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
-
 {{/*
 Cron labels
 */}}
@@ -116,7 +117,6 @@ app: {{ include "app.name" .globals }}-cron-{{ .name | replace "_" "-" }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
-
 {{/*
 Worker labels
 */}}
