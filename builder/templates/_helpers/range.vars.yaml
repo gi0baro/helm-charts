@@ -1,5 +1,6 @@
 [[ _is_rangemap = True ]]
 [[ _expose_ports = globals().get('_expose_ports', False) ]]
+[[ _persistence = globals().get('_persistence', False) ]]
 [[ _scope = 'local' ]]
 [[ name_suffix = vns + '-{{ $key | replace "_" "-" }}' ]]
 [[ label_helper = f'app.{vns}Labels' ]]

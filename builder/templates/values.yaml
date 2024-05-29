@@ -161,6 +161,17 @@ hooksConfig: true
 hooksSecret: true
 [[ end ]]
 
+[[ block persistence ]]
+persistence:
+  enabled: false
+  mount: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # storageClass:
+  # path: /data
+  # subPath:
+[[ end ]]
+
 [[ block sidecars ]]
 sidecarContainers: {}
 [[ end ]]

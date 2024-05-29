@@ -1,4 +1,4 @@
-# Generated from builder - b189508ad397
+# Generated from builder - c4ac633cf8a5
 
 
 
@@ -156,6 +156,13 @@ spec:
             - name: secrets-vol
               mountPath: {{ .Values.secretsVolume.mountPath | default "/secrets" }}
             {{- end }}
+            {{- if .Values.persistence.mount }}
+            - name: {{ .Values.persistence.name | default "data" }}
+              mountPath: {{ .Values.persistence.path | default "/data" }}
+              {{- if .Values.persistence.subPath }}
+              subPath: "{{ .Values.persistence.subPath }}"
+              {{- end }}
+            {{- end }}
             {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -179,6 +186,13 @@ spec:
             secretName: {{ include "app.fullname" . }}-vol      
             defaultMode: {{ .Values.secretsVolume.mode | default "0400" }}
         {{- end }}
+        - name: {{ .Values.persistence.name | default "data" }}
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "app.fullname" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

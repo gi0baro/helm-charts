@@ -23,6 +23,15 @@ volumeMounts:
   - name: secrets-vol
     mountPath: {{ [[ =_vtarget ]].secretsVolume.mountPath | default "/secrets" }}
   {{- end }}
+  [[ if globals().get('_persistence', True): ]]
+  {{- if [[ =_vtarget ]].persistence.mount }}
+  - name: {{ [[ =_vtarget ]].persistence.name | default "data" }}
+    mountPath: {{ [[ =_vtarget ]].persistence.path | default "/data" }}
+    {{- if [[ =_vtarget ]].persistence.subPath }}
+    subPath: "{{ [[ =_vtarget ]].persistence.subPath }}"
+    {{- end }}
+  {{- end }}
+  [[ pass ]]
   {{- with [[ =_vtarget ]].volumeMounts }}
   {{- toYaml . | nindent [[ =_indent + 12 ]] }}
   {{- end }}

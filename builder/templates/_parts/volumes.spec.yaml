@@ -29,6 +29,15 @@ volumes:
       secretName: {{ include "app.fullname" [[ =_gctx ]] }}-vol[[ =_name_suffix ]]
       defaultMode: {{ [[ =_vtarget ]].secretsVolume.mode | default "0400" }}
   {{- end }}
+  [[ if globals().get('_persistence', True): ]]
+  - name: {{ [[ =_vtarget ]].persistence.name | default "data" }}
+    {{- if [[ =_vtarget ]].persistence.enabled }}
+    persistentVolumeClaim:
+      claimName: {{ [[ =_vtarget ]].persistence.existingClaim | default (include "app.fullname" [[ =_gctx ]]) }}
+    {{- else }}
+    emptyDir: {}
+    {{- end }}
+  [[ pass ]]
   {{- with [[ =_vtarget ]].volumes }}
   {{- toYaml . | nindent [[ =_indent + 8 ]] }}
   {{- end }}
