@@ -2,6 +2,22 @@ apiVersion: v1
 entries:
   generic:
   - apiVersion: v2
+    created: "2024-05-29T00:05:21.339080085Z"
+    description: Generic web application
+    digest: 55452f343388b105de44b6dd3c364f8ccdf61e4b45f88b91fa774b1beb98df0c
+    home: https://github.com/gi0baro/helm-charts
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: g@baro.dev
+      name: Giovanni Barillari
+    name: generic
+    sources:
+    - https://github.com/gi0baro/helm-charts
+    type: application
+    urls:
+    - https://github.com/gi0baro/helm-charts/releases/download/generic-0.3.0/generic-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
     created: "2024-05-28T23:34:39.652554045Z"
     description: Generic web application
     digest: 97b009a0269315a678ccbade346d7681a912515d304f2e16decb78e0b9b5bc3a
@@ -66,4 +82,4 @@ entries:
     urls:
     - https://github.com/gi0baro/helm-charts/releases/download/raw-0.1.0/raw-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-28T23:34:39.652572229Z"
+generated: "2024-05-29T00:05:21.339122143Z"
