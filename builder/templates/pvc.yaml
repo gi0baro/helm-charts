@@ -1,3 +1,5 @@
+[[ include './_helpers/_genid.yaml' ]]
+
 {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim

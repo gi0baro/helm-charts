@@ -22,3 +22,9 @@ priorityClassName: {{ . | quote }}
 securityContext:
   {{- toYaml . | nindent [[ =_indent + 8 ]] }}
 {{- end }}
+
+# hostAliases
+{{- with [[ =_vtarget ]].hostAliases }}
+hostAliases:
+  {{- toYaml . | nindent [[ =_indent + 8 ]] }}
+{{- end }}

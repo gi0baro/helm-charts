@@ -1,3 +1,5 @@
+# Generated from builder - c4a0ee6e4e78
+
 {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim

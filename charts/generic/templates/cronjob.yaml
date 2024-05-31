@@ -1,4 +1,4 @@
-# Generated from builder - c4ac633cf8a5
+# Generated from builder - c4a0ee6e4e78
 
 
 {{- range $key, $val := .Values.crons }}
@@ -45,6 +45,12 @@ spec:
           {{- end }}
           {{- with $.Values.podSecurityContext }}
           securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          # hostAliases
+          {{- with $.Values.hostAliases }}
+          hostAliases:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
